@@ -113,9 +113,10 @@ class AVLTree(object):
 		return None
 
 
-    """gets amir's suggestion of balance factor
+	"""gets amir's suggestion of balance factor
 
 	@returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes
 	"""
+
 	def get_amir_balance_factor(self):
 		return None
