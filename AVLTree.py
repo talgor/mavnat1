@@ -83,6 +83,15 @@ class AVLTree(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
 	def delete(self, node):
+		#delete as usual from tree
+		
+		#y is deleted nodes parent
+		#while y is not null
+		#	compute BF(y)
+		#	if |bf|<2 
+		#   	if y height not changed TERMINATE
+		#		else continue looping with ys parent
+		#	else ,eaning |bf|=2 preform rotation and continue looping with ys parent
 		return -1
 
 
@@ -120,3 +129,29 @@ class AVLTree(object):
 
 	def get_amir_balance_factor(self):
 		return None
+	
+	def successor(self, node):
+		if node.right != None:
+			min = node.right
+			while min.left != None:
+				min = min.left
+			return min
+		
+		success = node.parent
+		while success != None and node == success.right:
+			node = success
+			success = node.parent
+		return success
+
+	def Predecessor(self, node):
+		if node.left != None:
+			max = node.left
+			while max.right != None:
+				max = max.right
+			return max
+		
+		pred = node.parent
+		while pred != None and node == pred.left:
+			node = pred
+			pred = node.parent
+		return pred
