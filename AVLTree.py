@@ -23,7 +23,12 @@ class AVLNode(object):
 		self.right = None
 		self.parent = None
 		self.height = -1
+		self.size = 0
+		self.amir = 0 # how manny of the nodes in the sub-tree have balance factor of 0
 		
+	def __repr__(self):  # can delete before uploading
+		s = "key: " + str(self.key) + " value: " + str(self.value)
+		return s
 
 	"""returns whether self is not a virtual node 
 
@@ -31,7 +36,20 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 	def is_real_node(self):
-		return False
+		if self.key == None:
+			return False
+		else:
+			return True
+
+
+	def add_virtual_childern(self):
+		l = AVLNode(None, None)
+		r = AVLNode(None, None)
+		self.left = l
+		self.right = r
+		self.hight = 0
+		self.size = 1
+		self.amir = 1
 
 
 
@@ -47,6 +65,7 @@ class AVLTree(object):
 	"""
 	def __init__(self):
 		self.root = None
+		self.max = None
 
 
 	"""searches for a node in the dictionary corresponding to the key
@@ -57,7 +76,11 @@ class AVLTree(object):
 	@returns: node corresponding to key
 	"""
 	def search(self, key):
-		return None
+		node = self.search_from_root(key, self.root)
+		if node.is_real_node():
+			return node
+		else:
+			return None
 
 
 	"""inserts a new node into the dictionary with corresponding key and value
@@ -71,8 +94,55 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
+	
+	def search_from_top(self, key, top):
+		node = top
+		while node.key!=None:
+			if node.key == key:
+				return node
+			elif key < node.key:
+				node = node.left
+			elif key > node.key:
+				node = node.right
+		return node
+
+
+	def search_from_max(self, key):
+		node = self.max
+		while node.key!=None and node.key > key:
+			node = node.parent
+		return self.search_from_top(key, node)
+
+
 	def insert(self, key, val, start="root"):
+		if self.root == None:
+			root = AVLNode(key, val)
+			root.add_virtual_childern()
+			self.root = root
+			self.max = root
+			return 0
+		if start == "max":
+			node = self.search_from_max(key)
+		else:
+			node = self.search_from_top(key, self.root)	
+		node.key = key
+		node.value = val
+		node.add_virtual_childern()
+		if key > self.max.key:
+			self.max = node
+		
+		rotations = 0
+
 		return -1
+
+
+def bypass(self, deleted, son):
+	son.parent = deleted.parent
+	if deleted.parent != None:
+		if deleted.parent.left == deleted:
+			deleted.parent.left = son
+		else:
+			deleted.parent.right = son
 
 
 	"""deletes node from the dictionary
@@ -82,9 +152,30 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def delete(self, node):
+	def delete(self, node): # not close to finished!
+		l = node.left.is_real_node()
+		r = node.right.is_real_node()
+		rebalance_from = node
+		if l and r:
+			''
+		if l:
+			self.bypass(node, node.right)	
+			rebalance_from = node.right
+		if r:
+			self.bypass(node, node.left)
+			rebalance_from = node.left
+		else:
+
+
 		return -1
 
+
+	def rec_in_order(self, node, l):
+		if node.is_real_node() == False:
+			return
+		self.rec_in_order(node.left, l)
+		l.append((node.key, node.value)) #will always happend in order, because of the command order
+		self.rec_in_order(node.right, l) 
 
 	"""returns an array representing dictionary 
 
@@ -92,7 +183,10 @@ class AVLTree(object):
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
 	"""
 	def avl_to_array(self):
-		return None
+		ordered = []
+		if self.root.is_real_node:
+			self.rec_in_order(self.root, ordered)
+		return ordered
 
 
 	"""returns the number of items in dictionary 
@@ -101,7 +195,7 @@ class AVLTree(object):
 	@returns: the number of items in dictionary 
 	"""
 	def size(self):
-		return -1	
+		return self.root.size
 
 
 	"""returns the root of the tree representing the dictionary
@@ -110,13 +204,22 @@ class AVLTree(object):
 	@returns: the root, None if the dictionary is empty
 	"""
 	def get_root(self):
-		return None
+		return self.root
 
 
 	"""gets amir's suggestion of balance factor
 
 	@returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes
 	"""
-
 	def get_amir_balance_factor(self):
-		return None
+		return self.root.amir / self.root.size
+	
+
+
+
+if __name__ == '__main__':
+	tree = AVLTree()
+	tree.insert(10, "ten")
+	tree.insert(20, "twenty")
+	tree.insert(5, "five")
+	print(tree.avl_to_array())
