@@ -165,7 +165,7 @@ def bypass(self, deleted, son):
 			self.bypass(node, node.left)
 			rebalance_from = node.left
 		else:
-
+			return
 
 		return -1
 
@@ -216,6 +216,107 @@ def bypass(self, deleted, son):
 	
 
 
+
+	
+
+	def balance_factor(self, node):
+		return node.left.height - node.right.height
+	
+	def successor(self, node):
+		if node.right != None:
+			min = node.right
+			while min.left != None:
+				min = min.left
+			return min
+		
+		success = node.parent
+		while success != None and node == success.right:
+			node = success
+			success = node.parent
+		return success
+
+	def predecessor(self, node):
+		if node.left != None:
+			max = node.left
+			while max.right != None:
+				max = max.right
+			return max
+		
+		pred = node.parent
+		while pred != None and node == pred.left:
+			node = pred
+			pred = node.parent
+		return pred
+	
+	def update(self, node):
+		node.height = 1 + max(self.height(node.left), self.height(node.right))
+		node.size = 1 + self.size(node.left) + self.size(node.right)
+		#update Amir balance factor
+
+	def rotate_right(self, criminal):
+		b = criminal
+		is_left_child = False
+
+		if b.parent.left == b:
+			is_left_child = True
+
+		a = b.left
+		b.left = a.right
+		b.left.parent = b
+		a.right = b
+		a.parent = b.parent
+
+		if is_left_child:
+			a.parent.left = a
+		else:
+			a.parent.right = a
+		
+		b.parent = a
+		
+		self.update(b)
+		self.update(a)
+
+
+	def rotate_left(self, criminal):
+		b = criminal
+		is_right_child = False
+
+		if b.parent.right == b:
+			is_right_child = True
+
+		a = b.right
+		b.right = a.left
+		b.right.parent = b
+		a.left = b
+		a.parent = b.parent
+
+		if is_right_child:
+			a.parent.right = a
+		else:
+			a.parent.left = a
+		
+		b.parent = a
+
+		self.update(b)
+		self.update(a)
+
+	def rebalance(self, node):
+		self.update(node)
+		bf = self.balance_factor(node)
+		
+		if bf == 2:
+			left_bf = self.balance_factor(node.left)
+			if left_bf == -1:
+				node.left = self.rotate_left(node.left)
+			self.rotate_right(node)
+			return
+
+		if bf == -2:
+			right_bf = self.balance_factor(node.right)
+			if right_bf == 1:
+				node.right = self.rotate_right(node.right)
+			self.rotate_left(node)
+			return
 
 if __name__ == '__main__':
 	tree = AVLTree()
