@@ -260,75 +260,200 @@ class AVLTree(object):
 			pred = node.parent
 		return pred
 	
+	def travel_up_after_insert(self, node):
+		# total rotations and height changes
+		total_updates = 0
+
+		rotation_done = False
+
+		while node:
+			total_updates += self.update(node)
+			bf = self.balance_factor(node)
+
+			if not rotation_done and abs(bf) > 1:
+				(new_root, rot) = self.rebalance(node)
+				total_updates += rot
+				if new_root.parent is None:
+					self.root = new_root
+				rotation_done = True
+
+			node = node.parent
+		
+		return total_updates
+
+	def travel_up_after_delete(self, node):
+		# total rotations and height changes
+		total_updates = 0
+
+		while node:
+			total_updates += self.update(node)
+			bf = self.balance_factor(node)
+
+			if abs(bf) > 1:
+				(new_root, rot) = self.rebalance(node)
+				total_updates += rot
+				if new_root.parent is None:
+					self.root = new_root
+
+			node = node.parent
+
+		return total_updates
+
 	def update(self, node):
+		curr_height = node.height
 		node.height = 1 + max(self.height(node.left), self.height(node.right))
 		node.size = 1 + self.size(node.left) + self.size(node.right)
+		if curr_height != node.height:
+			return 1
+		return 0
 		#update Amir balance factor
 
-	def rotate_right(self, criminal):
-		b = criminal
-		is_left_child = False
-
-		if b.parent.left == b:
-			is_left_child = True
-
+	def rotate_right(self, node):
+		# chat's fixes
+		b = node
 		a = b.left
 		b.left = a.right
-		b.left.parent = b
+		if a.right:
+			a.right.parent = b
+
 		a.right = b
 		a.parent = b.parent
 
-		if is_left_child:
-			a.parent.left = a
+		if b.parent:
+			if b.parent.left == b:
+				b.parent.left = a
+			else:
+				b.parent.right = a
 		else:
-			a.parent.right = a
-		
+			self.root = a
+
 		b.parent = a
+
+		num_height_updates = 0
+		num_height_updates += self.update(b)
+		num_height_updates += self.update(a)
+		return (a, num_height_updates)
+
+		# tal's version
+		# b = node
+		# is_left_child = False
+
+		# if b.parent.left == b:
+		# 	is_left_child = True
+
+		# a = b.left
+		# b.left = a.right
+		# b.left.parent = b
+		# a.right = b
+		# a.parent = b.parent
+
+		# if is_left_child:
+		# 	a.parent.left = a
+		# else:
+		# 	a.parent.right = a
 		
-		self.update(b)
-		self.update(a)
+		# b.parent = a
+		
+		# self.update(b)
+		# self.update(a)
 
 
-	def rotate_left(self, criminal):
-		b = criminal
-		is_right_child = False
-
-		if b.parent.right == b:
-			is_right_child = True
-
+	def rotate_left(self, node):
+		# chat's fixes
+		b = node
 		a = b.right
 		b.right = a.left
-		b.right.parent = b
+		if a.left:
+			a.left.parent = b
+
 		a.left = b
 		a.parent = b.parent
 
-		if is_right_child:
-			a.parent.right = a
+		if b.parent:
+			if b.parent.right == b:
+				b.parent.right = a
+			else:
+				b.parent.left = a
 		else:
-			a.parent.left = a
-		
+			self.root = a
+
 		b.parent = a
 
-		self.update(b)
-		self.update(a)
+		num_height_updates = 0
+		num_height_updates += self.update(b)
+		num_height_updates += self.update(a)
+		return (a, num_height_updates)
+	
+		# tal's version
+		# b = node
+		# is_right_child = False
+
+		# if b.parent.right == b:
+		# 	is_right_child = True
+
+		# a = b.right
+		# b.right = a.left
+		# b.right.parent = b
+		# a.left = b
+		# a.parent = b.parent
+
+		# if is_right_child:
+		# 	a.parent.right = a
+		# else:
+		# 	a.parent.left = a
+		
+		# b.parent = a
+
+		# self.update(b)
+		# self.update(a)
 
 	def rebalance(self, node):
-		self.update(node)
+		updates = 0
+		# chat's fixes
+		updates += self.update(node)
 		bf = self.balance_factor(node)
 		
-		if bf == 2:
-			left_bf = self.balance_factor(node.left)
-			if left_bf == -1:
-				node.left = self.rotate_left(node.left)
-			self.rotate_right(node)
-			return
+		if bf > 1:
+			if self.balance_factor(node.left) < 0:
+				(node.left, num_updates) = self.rotate_left(node.left)
+				updates += 1+num_updates
+				node.left.parent = node
 
-		if bf == -2:
-			right_bf = self.balance_factor(node.right)
-			if right_bf == 1:
-				node.right = self.rotate_right(node.right)
-			self.rotate_left(node)
-			return
+			(new_root, num_updates) = self.rotate_right(node)
+			updates += 1+num_updates
+			return (new_root, updates)
+
+		if bf < -1:
+			if self.balance_factor(node.right) > 0:
+				(node.right, num_updates) = self.rotate_right(node.right)
+				updates += 1+num_updates
+				node.right.parent = node
+
+			(new_root, num_updates) = self.rotate_left(node)
+			updates += 1+num_updates
+			return (new_root, updates)
+		
+		return (node, updates)
+
+
+
+		# tal's version
+		# self.update(node)
+		# bf = self.balance_factor(node)
+		
+		# if bf > 1:
+		# 	left_bf = self.balance_factor(node.left)
+		# 	if left_bf == -1:
+		# 		node.left = self.rotate_left(node.left)
+		# 	self.rotate_right(node)
+		# 	return
+
+		# if bf < -1:
+		# 	right_bf = self.balance_factor(node.right)
+		# 	if right_bf == 1:
+		# 		node.right = self.rotate_right(node.right)
+		# 	self.rotate_left(node)
+		# 	return
 
 if __name__ == '__main__':
 	tree = AVLTree()
