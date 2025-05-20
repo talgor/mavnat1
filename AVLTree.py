@@ -136,13 +136,15 @@ class AVLTree(object):
 		return -1
 
 
-def bypass(self, deleted, son):
-	son.parent = deleted.parent
-	if deleted.parent != None:
-		if deleted.parent.left == deleted:
-			deleted.parent.left = son
+	def bypass(self, deleted, son):
+		son.parent = deleted.parent
+		if deleted.parent != None:
+			if deleted.parent.left == deleted:
+				deleted.parent.left = son
+			else:
+				deleted.parent.right = son
 		else:
-			deleted.parent.right = son
+			self.root = son
 
 
 	"""deletes node from the dictionary
@@ -157,18 +159,28 @@ def bypass(self, deleted, son):
 		r = node.right.is_real_node()
 		rebalance_from = node
 		if l and r:
-			''
+			suc = self.successor(node)
+			self.bypass(suc, suc.right)
+			rebalance_from = suc.parent
+			self.replace_node(node, suc)
 		if l:
-			self.bypass(node, node.right)	
-			rebalance_from = node.right
-		if r:
-			self.bypass(node, node.left)
-			rebalance_from = node.left
-		else:
-			return
-
+			self.bypass(node, node.left)	
+			rebalance_from = node.parent
+		else: #if node is a leaf, will replace node with it's right virtual leaf
+			self.bypass(node, node.right)
+			rebalance_from = node.parent #what if it is the root? and there is no parent?
+		#rebalancing!! and to return the number of rotations
 		return -1
 
+	def replace_node(self, replaced, replacer):
+		self.bypass(replaced, replacer) #sorts the pointers to and from the parent
+		replacer.right = replaced.right
+		replacer.left = replaced.left
+		replacer.right.parent = replacer
+		replacer.left.parent = replacer
+		replacer.hight = replaced.hight
+		replacer.size = replaced.size
+		replacer.amir = replaced.amir
 
 	def rec_in_order(self, node, l):
 		if node.is_real_node() == False:
@@ -184,7 +196,7 @@ def bypass(self, deleted, son):
 	"""
 	def avl_to_array(self):
 		ordered = []
-		if self.root.is_real_node:
+		if self.root != None:
 			self.rec_in_order(self.root, ordered)
 		return ordered
 
@@ -214,10 +226,10 @@ def bypass(self, deleted, son):
 	def get_amir_balance_factor(self):
 		return self.root.amir / self.root.size
 	
-
-
-
-	
+	def update_amir(self, node):
+		node.amir = node.left.amir + node.right.amir
+		if self.balance_factor(node) == 0:
+			node.amir += 1
 
 	def balance_factor(self, node):
 		return node.left.height - node.right.height
