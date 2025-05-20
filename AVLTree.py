@@ -300,8 +300,8 @@ class AVLTree(object):
 
 	def update(self, node):
 		curr_height = node.height
-		node.height = 1 + max(self.height(node.left), self.height(node.right))
-		node.size = 1 + self.size(node.left) + self.size(node.right)
+		node.height = 1 + max(node.left.height, node.right.height)
+		node.size = 1 + node.left.size + node.right.size
 
 		#update Amir balance factor
 		node.amir = node.left.amir + node.right.amir
