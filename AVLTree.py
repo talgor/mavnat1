@@ -1,8 +1,8 @@
-#username - complete info
-#id1      - complete info 
-#name1    - complete info 
-#id2      - complete info
-#name2    - complete info  
+#username - talgoren1
+#id1      - 213442163
+#name1    - Tal Goren
+#id2      - 206705303
+#name2    - Ronny Haviv
 
 
 
@@ -24,11 +24,7 @@ class AVLNode(object):
 		self.parent = None
 		self.height = -1
 		self.size = 0
-		self.amir = 0 # how manny of the nodes in the sub-tree have balance factor of 0
-		
-	def __repr__(self):  # can delete before uploading
-		s = "key: " + str(self.key) + " value: " + str(self.value)
-		return s
+		self.amir = 0 # how many of the nodes in the sub-tree have balance factor of 0
 
 	"""returns whether self is not a virtual node 
 
@@ -156,7 +152,7 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def delete(self, node): # not close to finished!
+	def delete(self, node):
 		l = node.left.is_real_node()
 		r = node.right.is_real_node()
 		rebalance_from = node
@@ -170,7 +166,7 @@ class AVLTree(object):
 			rebalance_from = node.parent
 		else: #if node is a leaf, will replace node with it's right virtual leaf
 			self.bypass(node, node.right)
-			rebalance_from = node.parent #what if it is the root? and there is no parent?
+			rebalance_from = node.parent
 		total_updates = self.travel_up_after_delete(rebalance_from)
 		return total_updates
 
@@ -188,7 +184,7 @@ class AVLTree(object):
 		if node.is_real_node() == False:
 			return
 		self.rec_in_order(node.left, l)
-		l.append((node.key, node.value)) #will always happend in order, because of the command order
+		l.append((node.key, node.value)) #will always happen in order, because of the command order
 		self.rec_in_order(node.right, l) 
 
 	"""returns an array representing dictionary 
@@ -314,7 +310,6 @@ class AVLTree(object):
 		return 0
 
 	def rotate_right(self, node):
-		# chat's fixes
 		b = node
 		a = b.left
 		b.left = a.right
@@ -339,32 +334,8 @@ class AVLTree(object):
 		num_height_updates += self.update(a)
 		return (a, num_height_updates)
 
-		# tal's version
-		# b = node
-		# is_left_child = False
-
-		# if b.parent.left == b:
-		# 	is_left_child = True
-
-		# a = b.left
-		# b.left = a.right
-		# b.left.parent = b
-		# a.right = b
-		# a.parent = b.parent
-
-		# if is_left_child:
-		# 	a.parent.left = a
-		# else:
-		# 	a.parent.right = a
-		
-		# b.parent = a
-		
-		# self.update(b)
-		# self.update(a)
-
 
 	def rotate_left(self, node):
-		# chat's fixes
 		b = node
 		a = b.right
 		b.right = a.left
@@ -388,33 +359,10 @@ class AVLTree(object):
 		num_height_updates += self.update(b)
 		num_height_updates += self.update(a)
 		return (a, num_height_updates)
-	
-		# tal's version
-		# b = node
-		# is_right_child = False
 
-		# if b.parent.right == b:
-		# 	is_right_child = True
-
-		# a = b.right
-		# b.right = a.left
-		# b.right.parent = b
-		# a.left = b
-		# a.parent = b.parent
-
-		# if is_right_child:
-		# 	a.parent.right = a
-		# else:
-		# 	a.parent.left = a
-		
-		# b.parent = a
-
-		# self.update(b)
-		# self.update(a)
 
 	def rebalance(self, node):
 		updates = 0
-		# chat's fixes
 		updates += self.update(node)
 		bf = self.balance_factor(node)
 		
@@ -439,30 +387,3 @@ class AVLTree(object):
 			return (new_root, updates)
 		
 		return (node, updates)
-
-
-
-		# tal's version
-		# self.update(node)
-		# bf = self.balance_factor(node)
-		
-		# if bf > 1:
-		# 	left_bf = self.balance_factor(node.left)
-		# 	if left_bf == -1:
-		# 		node.left = self.rotate_left(node.left)
-		# 	self.rotate_right(node)
-		# 	return
-
-		# if bf < -1:
-		# 	right_bf = self.balance_factor(node.right)
-		# 	if right_bf == 1:
-		# 		node.right = self.rotate_right(node.right)
-		# 	self.rotate_left(node)
-		# 	return
-
-if __name__ == '__main__':
-	tree = AVLTree()
-	tree.insert(10, "ten")
-	tree.insert(20, "twenty")
-	tree.insert(5, "five")
-	print(tree.avl_to_array())
