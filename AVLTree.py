@@ -42,12 +42,14 @@ class AVLNode(object):
 			return True
 
 
-	def add_virtual_childern(self):
+	def add_virtual_children(self):
 		l = AVLNode(None, None)
 		r = AVLNode(None, None)
 		self.left = l
 		self.right = r
-		self.hight = 0
+		r.parent = self
+		l.parent = self
+		self.height = 0
 		self.size = 1
 		self.amir = 1
 
@@ -117,7 +119,7 @@ class AVLTree(object):
 	def insert(self, key, val, start="root"):
 		if self.root == None:
 			root = AVLNode(key, val)
-			root.add_virtual_childern()
+			root.add_virtual_children()
 			self.root = root
 			self.max = root
 			return 0
@@ -127,7 +129,7 @@ class AVLTree(object):
 			node = self.search_from_top(key, self.root)	
 		node.key = key
 		node.value = val
-		node.add_virtual_childern()
+		node.add_virtual_children()
 		if key > self.max.key:
 			self.max = node
 
@@ -163,7 +165,7 @@ class AVLTree(object):
 			self.bypass(suc, suc.right)
 			rebalance_from = suc.parent
 			self.replace_node(node, suc)
-		if l:
+		elif l:
 			self.bypass(node, node.left)	
 			rebalance_from = node.parent
 		else: #if node is a leaf, will replace node with it's right virtual leaf
@@ -178,7 +180,7 @@ class AVLTree(object):
 		replacer.left = replaced.left
 		replacer.right.parent = replacer
 		replacer.left.parent = replacer
-		replacer.hight = replaced.hight
+		replacer.height = replaced.height
 		replacer.size = replaced.size
 		replacer.amir = replaced.amir
 
@@ -264,7 +266,6 @@ class AVLTree(object):
 		total_updates = 0
 
 		rotation_done = False
-
 		while node:
 			total_updates += self.update(node)
 			bf = self.balance_factor(node)
