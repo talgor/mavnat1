@@ -76,7 +76,7 @@ class AVLTree(object):
 	@returns: node corresponding to key
 	"""
 	def search(self, key):
-		node = self.search_from_root(key, self.root)
+		node = self.search_from_top(key, self.root)
 		if node.is_real_node():
 			return node
 		else:
@@ -130,10 +130,10 @@ class AVLTree(object):
 		node.add_virtual_childern()
 		if key > self.max.key:
 			self.max = node
-		
-		rotations = 0
 
-		return -1
+		total_updates = self.travel_up_after_insert(node.parent)
+
+		return total_updates
 
 
 	def bypass(self, deleted, son):
@@ -169,8 +169,8 @@ class AVLTree(object):
 		else: #if node is a leaf, will replace node with it's right virtual leaf
 			self.bypass(node, node.right)
 			rebalance_from = node.parent #what if it is the root? and there is no parent?
-		#rebalancing!! and to return the number of rotations
-		return -1
+		total_updates = self.travel_up_after_delete(rebalance_from)
+		return total_updates
 
 	def replace_node(self, replaced, replacer):
 		self.bypass(replaced, replacer) #sorts the pointers to and from the parent
@@ -207,6 +207,8 @@ class AVLTree(object):
 	@returns: the number of items in dictionary 
 	"""
 	def size(self):
+		if self.root == None:
+			return 0
 		return self.root.size
 
 
@@ -224,20 +226,17 @@ class AVLTree(object):
 	@returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes
 	"""
 	def get_amir_balance_factor(self):
+		if self.root == None:
+			return 0
 		return self.root.amir / self.root.size
 	
-	def update_amir(self, node):
-		node.amir = node.left.amir + node.right.amir
-		if self.balance_factor(node) == 0:
-			node.amir += 1
-
 	def balance_factor(self, node):
 		return node.left.height - node.right.height
 	
 	def successor(self, node):
-		if node.right != None:
+		if node.right.is_real_node():
 			min = node.right
-			while min.left != None:
+			while min.left.is_real_node():
 				min = min.left
 			return min
 		
@@ -248,9 +247,9 @@ class AVLTree(object):
 		return success
 
 	def predecessor(self, node):
-		if node.left != None:
+		if node.left.is_real_node():
 			max = node.left
-			while max.right != None:
+			while max.right.is_real_node():
 				max = max.right
 			return max
 		
@@ -303,10 +302,15 @@ class AVLTree(object):
 		curr_height = node.height
 		node.height = 1 + max(self.height(node.left), self.height(node.right))
 		node.size = 1 + self.size(node.left) + self.size(node.right)
+
+		#update Amir balance factor
+		node.amir = node.left.amir + node.right.amir
+		if self.balance_factor(node) == 0:
+			node.amir += 1
+
 		if curr_height != node.height:
 			return 1
 		return 0
-		#update Amir balance factor
 
 	def rotate_right(self, node):
 		# chat's fixes
