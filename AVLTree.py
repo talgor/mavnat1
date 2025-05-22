@@ -107,7 +107,7 @@ class AVLTree(object):
 
 	def search_from_max(self, key):
 		node = self.max
-		while node.key!=None and node.key > key:
+		while node.key!=None and node.key > key and node.parent != None:
 			node = node.parent
 		return self.search_from_top(key, node)
 
